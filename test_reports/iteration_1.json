@@ -1,0 +1,41 @@
+{
+  "summary": "Full backend + frontend smoke test of fresh Interiojunction Expo app. 30/30 pytest cases pass against public ingress URL. Frontend mobile flows verified: customer phone OTP (dev_code auto-fill) -> customer home shows seeded projects -> project detail with full stage timeline; AI assistant returns INR-priced kitchen estimate via Emergent LLM; staff login routes admin to operations dashboard with KPIs and project list; factory login routes to Part Scanner and manual-part-input + manual-scan-button advances a part one stage and shows in Recent Scans. Authorization is enforced (customer -> 403 on /scan, /scan/recent, /leads, /dashboard, PATCH /tickets, and only sees own projects). No React Native red screens, no critical errors. Two console warnings observed (non-blocking): 'shadow*' style props deprecated and 'props.pointerEvents' deprecated — these originate from react-native-web internals, not app code, and can be ignored unless the upstream libs are updated. No deprecated Expo packages (no expo-av / expo-barcode-scanner / expo-background-fetch); expo-camera is used for QR scanning (can't be exercised on web — manual fallback validated).",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "any", "issue": "bcrypt 'AttributeError: module bcrypt has no attribute __about__' trapped warning at startup from passlib — harmless but log noise. Pinning passlib[bcrypt] or bcrypt<4 silences it."},
+      {"endpoint": "POST /api/projects", "issue": "Sequence numbering uses count_documents + 41, which collides if a project is deleted/re-created. Not a bug today, just brittle."},
+      {"endpoint": "POST /api/auth/otp/verify", "issue": "On unknown phone with no prior OTP request, returns 400 'Request an OTP first' which is correct; but verify endpoint does not rate-limit by IP — only by attempts on existing record. Low risk because dev mock."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Customer home / Factory scanner / Staff dashboard", "issues": ["Touch targets all >=44pt, spacing on 8pt grid, contrast on cream #FDFAF6 + black is strong. No issues observed."]}
+    ],
+    "react_native_issues": [
+      {"component": "react-native-web internals", "issue": "Console warning: '\"shadow*\" style props are deprecated. Use \"boxShadow\".' Comes from RNW, not app code. Reference: browser console during any screen load."},
+      {"component": "react-native-web internals", "issue": "Console warning: 'props.pointerEvents is deprecated. Use style.pointerEvents'. Comes from RNW, not app code."}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/backend_test.py", "/app/test_reports/pytest/pytest_results.xml"],
+  "action_items": [
+    "Optional: pin passlib/bcrypt to silence 'module bcrypt has no attribute __about__' warning (e.g. add 'bcrypt<4' or upgrade passlib).",
+    "Optional: harden /api/projects sequence generator (use a counters collection or max(project_code) instead of count_documents + 41) to avoid collisions on delete/re-create."
+  ],
+  "critical_code_review_comments": [
+    "server.py is a single 485-line file. Still under the 700-line guideline but consider splitting auth / projects / scanner / tickets / leads / ai into routers as it grows.",
+    "All endpoints exclude MongoDB _id via projection — good.",
+    "All endpoints validated with Pydantic models — good.",
+    "Frontend uses process.env.EXPO_PUBLIC_BACKEND_URL via src/api.ts wrapper — good.",
+    "All interactive elements expose testID (mode tabs, inputs, send/verify buttons, manual scan, project cards, AI send, ticket form). Good coverage."
+  ],
+  "updated_files": ["/app/backend/tests/backend_test.py"],
+  "success_rate": {"backend": "100% (30/30)", "frontend": "100% on smoke flows (auth x3 roles, project detail, AI chat, scan, dashboard)"},
+  "seed_data_creation": "Backend seed runs on startup. Pytest additionally created TEST_ prefixed projects (PRJ-2026-044, PRJ-2026-045), TEST_ tickets and TEST_Lead lead. These are visible in the staff dashboard and do not interfere with prod data.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Public URL is https://junction-app-design.preview.emergentagent.com (EXPO_PUBLIC_BACKEND_URL). All API routes are under /api. Credentials: admin@interiojunction.in / Admin@123, factory@interiojunction.in / Factory@123, sales@interiojunction.in / Sales@123, customer phone 9000000001 (OTP dev_code in /api/auth/otp/request response, auto-filled by login UI). Re-running scanner tests will keep advancing seeded parts toward Installation; backend_test.py creates a fresh project per scan test to avoid order dependence.",
+  "rca_of_issue": "N/A — no failing tests after fix to scanner tests which were depending on seeded part stage order. Tests now create their own project to start from NEW."
+}
