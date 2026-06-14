@@ -1,0 +1,154 @@
+{
+  "app_name": "Interiojunction",
+  "personality": "3 Editorial Mobile LIGHT with 1 iOS-Native Clean utility",
+  "personality_one_liner": "A premium, magazine-like interface that elevates factory-direct interior operations into a high-end customer and staff experience.",
+  "color": {
+    "surface": "#FDFAF6",
+    "onSurface": "#000000",
+    "surfaceSecondary": "#FFFFFF",
+    "onSurfaceSecondary": "#000000",
+    "surfaceTertiary": "#F0F0F0",
+    "onSurfaceTertiary": "#000000",
+    "surfaceInverse": "#1A1A1A",
+    "onSurfaceInverse": "#FDFAF6",
+    "brand": "#000000",
+    "brandPrimary": "#000000",
+    "onBrandPrimary": "#FDFAF6",
+    "brandSecondary": "#333333",
+    "onBrandSecondary": "#FFFFFF",
+    "brandTertiary": "#EAE4DB",
+    "onBrandTertiary": "#000000",
+    "success": "#2D6A4F",
+    "onSuccess": "#FFFFFF",
+    "warning": "#B08D57",
+    "onWarning": "#FFFFFF",
+    "error": "#9B2C2C",
+    "onError": "#FFFFFF",
+    "info": "#4A4A4A",
+    "onInfo": "#FFFFFF",
+    "border": "#E8E8E8",
+    "borderStrong": "#CCCCCC",
+    "divider": "#F0F0F0"
+  },
+  "typography": {
+    "displayFontFamily": "Playfair Display",
+    "textFontFamily": "DM Sans",
+    "scale": {
+      "sm": 12,
+      "base": 14,
+      "lg": 16,
+      "xl": 20,
+      "2xl": 24
+    }
+  },
+  "spacing": {
+    "rule": "Generous editorial vertical spacing. Use md/lg for utility screens, xl/2xl for customer screens.",
+    "xs": 4,
+    "sm": 8,
+    "md": 12,
+    "lg": 16,
+    "xl": 24,
+    "2xl": 32,
+    "3xl": 48
+  },
+  "radius_tokens": {
+    "sm": 0,
+    "md": 6,
+    "lg": 12,
+    "pill": 999
+  },
+  "shadow_tier": "1",
+  "navigation": "bottom_tabs",
+  "icon_set": "Feather",
+  "glassmorphism": {
+    "enabled": "true",
+    "do's": [
+      "Use on bottom tab bar",
+      "Use on sticky headers over scrollable lists (CRM/Customer Portal)",
+      "Use for the floating AI assistant chat button"
+    ],
+    "dont's": [
+      "Do not use on factory scanner screen to ensure maximum performance",
+      "Do not use on form inputs or dense data cards"
+    ]
+  },
+  "platform_libraries": {
+    "glass": {
+      "ios": "expo-glass-effect",
+      "android": "expo-blur",
+      "low_end_android_fallback": "solid surfaceSecondary"
+    },
+    "image": "expo-image",
+    "blur": "expo-blur",
+    "bottom_sheet": "@gorhom/bottom-sheet",
+    "animation": "react-native-reanimated",
+    "gesture": "react-native-gesture-handler"
+  },
+  "screens": [
+    {
+      "name": "Login",
+      "purpose": "A premium gateway supporting both Staff (Email/Password) and Customer (Phone/OTP) authentication.",
+      "states": {
+        "loading": "Subtle loading spinner inside the primary black button.",
+        "empty": "N/A",
+        "error": "Inline red text below the input fields or a top banner."
+      },
+      "layout": "Minimalist single-column layout. Large elegant wordmark 'Interiojunction' in Playfair Display. Clean input fields with bottom borders or light #F0F0F0 background. A toggle for 'Customer' vs 'Staff' login. Primary button sticky above keyboard."
+    },
+    {
+      "name": "Customer Portal (Home)",
+      "purpose": "Provides customers with a luxurious view of their project's progress and access to the AI design assistant.",
+      "states": {
+        "loading": "Skeleton loaders for project cards and timeline.",
+        "empty": "Elegant illustration of a drafted floor plan + 'No active projects yet. Start chatting with our AI to get a quote!'",
+        "error": "Readable text with a 'Retry' button."
+      },
+      "layout": "Hero section featuring a real image of the project design (kitchen/wardrobe) with a top-to-bottom gradient scrim. Below, a horizontal or vertical step-by-step timeline (NEW → CUT → EDGE... → INSTALL). Floating Action Button (glass) for AI Design Assistant chat. Section for service tickets at the bottom."
+    },
+    {
+      "name": "Factory Scanner",
+      "purpose": "A high-efficiency utility for factory staff to scan QR labels and advance parts through production.",
+      "states": {
+        "loading": "Camera initializing overlay.",
+        "empty": "Camera view dominates, 'No recent scans' list below.",
+        "error": "Large red toast/alert for invalid QR code with haptic error."
+      },
+      "layout": "Top half is a full-width camera preview with a scanning frame overlay. Large touch targets. Bottom half is a bottom sheet or list showing 'Recent Scans' with part details and updated status chips. High contrast, scan-first workflow."
+    },
+    {
+      "name": "Staff CRM Dashboard",
+      "purpose": "Admin and sales dashboard tracking leads, active projects, and open tickets.",
+      "states": {
+        "loading": "Skeleton list rows.",
+        "empty": "Empty state illustration + 'No active projects or tickets.'",
+        "error": "Error message with 'Reload Data' button."
+      },
+      "layout": "Editorial-style large headers. Horizontal scrollable summary cards (Projects, Tickets, Leads). Vertical list of active projects with #EAE4DB tinted status chips. Clean dividers (#F0F0F0) between list rows. Sticky filter row with glass effect."
+    }
+  ],
+  "images": {
+    "customer_hero_kitchen": {
+      "url": "https://images.unsplash.com/photo-1663811396777-05505d999151?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA4Mzl8MHwxfHNlYXJjaHwyfHxtb2Rlcm4lMjBtaW5pbWFsaXN0JTIwa2l0Y2hlbiUyMGludGVyaW9yfGVufDB8fHx8MTc4MTQ0NzcwMXww&ixlib=rb-4.1.0&q=85",
+      "alt": "Modern minimalist kitchen interior with grey cabinets"
+    },
+    "customer_hero_wardrobe": {
+      "url": "https://images.unsplash.com/photo-1708397016786-8916880649b8?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2MDV8MHwxfHNlYXJjaHwyfHxsdXh1cnklMjBtb2R1bGFyJTIwd2FyZHJvYmUlMjBpbnRlcmlvcnxlbnwwfHx8fDE3ODE0NDc3MDF8MA&ixlib=rb-4.1.0&q=85",
+      "alt": "Luxury modular walk-in wardrobe"
+    }
+  },
+  "haptics": {
+    "primary_button_press": "impactLight",
+    "qr_scan_success": "notificationSuccess",
+    "qr_scan_error": "notificationError",
+    "tab_switch": "selection",
+    "ticket_submit": "notificationSuccess"
+  },
+  "instructions_to_main_agent": [
+    "Ensure the app seamlessly handles role-based authentication and navigation routing. The UI must adapt completely based on the user's role (Customer vs Factory vs Staff).",
+    "Strictly follow the color palette. Use #FDFAF6 as the main background for the Customer Portal and CRM to match the interiojunction.in website. Use pure black (#000000) for primary buttons and text.",
+    "Implement the Factory Scanner screen with performance in mind. Maximize the camera viewport and use large, high-contrast touch targets. Do not use glassmorphism on the scanner screen.",
+    "For all hero images (like customer_hero_kitchen), apply the MANDATORY gradient-to-dark scrim pattern (transparent at 0% -> 70% surfaceInverse at 100%) so that white text placed over the image remains readable.",
+    "Use Playfair Display for large display headings to give the app a premium, editorial interior-design feel. Use DM Sans for all body text, UI labels, and data fields.",
+    "Ensure the production stage timeline (NEW → CUT → EDGE → MACH → FQC → PACK → DISP → SITE/INSTALL) is clearly visualized using horizontal or vertical tracking steps in the Customer Portal."
+  ]
+}
