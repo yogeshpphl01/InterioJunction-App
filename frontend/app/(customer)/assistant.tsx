@@ -1,9 +1,10 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import {
-  View, StyleSheet, KeyboardAvoidingView, Platform, ScrollView,
-  TextInput, Pressable, ActivityIndicator,
+  View, StyleSheet, Platform, ScrollView,
+  TextInput, Pressable, ActivityIndicator, Keyboard,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { Feather } from "@expo/vector-icons";
 
 import { api } from "@/src/api";
@@ -21,11 +22,33 @@ const SUGGESTIONS = [
 
 export default function Assistant() {
   const insets = useSafeAreaInsets();
+  const tabBarHeight = useBottomTabBarHeight();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [sid, setSid] = useState<string | undefined>();
+  const [kbHeight, setKbHeight] = useState(0);
   const scrollRef = useRef<ScrollView>(null);
+
+  const scrollToEnd = useCallback((delay = 60) => {
+    setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), delay);
+  }, []);
+
+  // Keep the latest message + input bar visible above the keyboard, and allow
+  // the conversation to stay scrollable while the keypad is open.
+  useEffect(() => {
+    const showEvt = Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+    const hideEvt = Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+    const showSub = Keyboard.addListener(showEvt, (e) => {
+      // The keyboard overlaps the tab bar that sits below this screen, so only
+      // lift the content by the part of the keyboard above that tab bar.
+      const h = (e.endCoordinates?.height ?? 0) - tabBarHeight;
+      setKbHeight(h > 0 ? h : 0);
+      scrollToEnd(50);
+    });
+    const hideSub = Keyboard.addListener(hideEvt, () => setKbHeight(0));
+    return () => { showSub.remove(); hideSub.remove(); };
+  }, [scrollToEnd, tabBarHeight]);
 
   const send = useCallback(async (text: string) => {
     if (!text.trim() || sending) return;
@@ -33,7 +56,7 @@ export default function Assistant() {
     setMessages((m) => [...m, userMsg]);
     setInput("");
     setSending(true);
-    setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 50);
+    scrollToEnd(50);
     try {
       const res = await api<{ reply: string; session_id: string }>("/ai/chat", {
         method: "POST", body: { message: text, session_id: sid },
@@ -44,19 +67,23 @@ export default function Assistant() {
       setMessages((m) => [...m, { role: "assistant", text: "Sorry, I couldn't respond right now. Please try again." }]);
     } finally {
       setSending(false);
-      setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 80);
+      scrollToEnd(80);
     }
-  }, [sending, sid]);
+  }, [sending, sid, scrollToEnd]);
 
   return (
     <View style={{ flex: 1, backgroundColor: C.surface }}>
       <Header title="Design AI" subtitle="Interiojunction Assistant" />
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined} keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}>
+      {/* Manual keyboard handling (works under edge-to-edge on both platforms). */}
+      <View style={{ flex: 1, marginBottom: kbHeight }}>
         <ScrollView
           ref={scrollRef}
-          contentContainerStyle={{ padding: S.lg, paddingBottom: S.lg }}
+          style={{ flex: 1 }}
+          contentContainerStyle={{ padding: S.lg, paddingBottom: S.lg, flexGrow: 1 }}
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="interactive"
           showsVerticalScrollIndicator={false}
+          onContentSizeChange={() => { if (messages.length) scrollToEnd(0); }}
         >
           {messages.length === 0 && (
             <View style={styles.intro}>
@@ -93,13 +120,14 @@ export default function Assistant() {
           )}
         </ScrollView>
 
-        <View style={[styles.inputBar, { paddingBottom: insets.bottom > 0 ? insets.bottom : S.md }]}>
+        <View style={[styles.inputBar, { paddingBottom: kbHeight > 0 ? S.md : (insets.bottom > 0 ? insets.bottom : S.md) }]}>
           <TextInput
             testID="ai-input"
             placeholder="Ask about design or pricing…"
             placeholderTextColor={C.inkMute}
             value={input}
             onChangeText={setInput}
+            onFocus={() => scrollToEnd(120)}
             style={styles.input}
             multiline
             onSubmitEditing={() => send(input)}
@@ -109,7 +137,7 @@ export default function Assistant() {
             <Feather name="arrow-up" size={20} color={C.onBrand} />
           </Pressable>
         </View>
-      </KeyboardAvoidingView>
+      </View>
     </View>
   );
 }

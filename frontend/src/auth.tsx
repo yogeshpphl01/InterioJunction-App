@@ -8,6 +8,7 @@ export type User = {
   name?: string;
   email?: string;
   phone?: string;
+  is_guest?: boolean;
 };
 
 type AuthCtx = {
@@ -16,6 +17,7 @@ type AuthCtx = {
   loginEmail: (email: string, password: string) => Promise<void>;
   requestOtp: (phone: string) => Promise<string | undefined>;
   verifyOtp: (phone: string, code: string, name?: string) => Promise<void>;
+  guestLogin: (name?: string) => Promise<void>;
   logout: () => Promise<void>;
 };
 
@@ -73,6 +75,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await persist(res.token, res.user);
   }, [persist]);
 
+  const guestLogin = useCallback(async (name?: string) => {
+    const res = await api<{ token: string; user: User }>("/auth/guest", {
+      method: "POST",
+      body: { name },
+    });
+    await persist(res.token, res.user);
+  }, [persist]);
+
   const logout = useCallback(async () => {
     setAuthToken(null);
     setUser(null);
@@ -81,7 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <Ctx.Provider value={{ user, booting, loginEmail, requestOtp, verifyOtp, logout }}>
+    <Ctx.Provider value={{ user, booting, loginEmail, requestOtp, verifyOtp, guestLogin, logout }}>
       {children}
     </Ctx.Provider>
   );

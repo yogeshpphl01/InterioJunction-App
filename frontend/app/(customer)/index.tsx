@@ -49,6 +49,15 @@ export default function CustomerHome() {
             <Feather name="arrow-right" size={20} color={C.onInverse} />
           </Pressable>
 
+          <Pressable testID="start-project-card" onPress={() => router.push("/(customer)/start-project")} style={styles.startCard}>
+            <View style={styles.startIcon}><Feather name="credit-card" size={18} color={C.ink} /></View>
+            <View style={{ flex: 1 }}>
+              <Txt weight="bold" size={FS.lg}>Start Your Project</Txt>
+              <Txt size={FS.sm} color={C.inkMute}>Book your slot with a 10% booking payment</Txt>
+            </View>
+            <Feather name="arrow-right" size={20} color={C.ink} />
+          </Pressable>
+
           {projects.length === 0 ? (
             <Empty icon="layout" title="No active projects yet"
               subtitle="Chat with our AI Design Assistant to get a free quote and start your interior journey." />
@@ -81,8 +90,10 @@ export default function CustomerHome() {
 }
 
 const styles = StyleSheet.create({
-  aiCard: { flexDirection: "row", alignItems: "center", backgroundColor: C.inverse, borderRadius: R.lg, padding: S.lg, marginBottom: S.xl, ...shadow },
+  aiCard: { flexDirection: "row", alignItems: "center", backgroundColor: C.inverse, borderRadius: R.lg, padding: S.lg, marginBottom: S.md, ...shadow },
   aiIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: "rgba(253,250,246,0.15)", alignItems: "center", justifyContent: "center", marginRight: S.md },
+  startCard: { flexDirection: "row", alignItems: "center", backgroundColor: C.surface2, borderRadius: R.lg, borderWidth: 1, borderColor: C.border, padding: S.lg, marginBottom: S.xl, ...shadow },
+  startIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: C.tint, alignItems: "center", justifyContent: "center", marginRight: S.md },
   projCard: { backgroundColor: C.surface2, borderRadius: R.lg, borderWidth: 1, borderColor: C.border, overflow: "hidden", marginBottom: S.lg, ...shadow },
   projHero: { height: 150, justifyContent: "flex-end" },
   projHeroBody: { padding: S.md, alignItems: "flex-start" },

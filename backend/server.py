@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
+import re
 import logging
 import uuid
 import random
@@ -55,6 +56,42 @@ def iso(dt):
 
 def sha(v: str) -> str:
     return hashlib.sha256(v.encode()).hexdigest()
+
+
+def clean_reply(text: str) -> str:
+    """Strip Markdown / formatting noise so chat replies read as clean plain text.
+
+    The LLM occasionally emits Markdown (``#`` headings, ``**bold**``, ``*`` bullets,
+    backticks, ``$`` math delimiters) which surfaces as stray filler characters in the
+    chat bubbles. This converts that into natural, readable prose."""
+    if not text:
+        return text
+    t = text.replace("\r\n", "\n")
+    # Fenced / inline code markers
+    t = re.sub(r"```[a-zA-Z0-9]*\n?", "", t)
+    t = t.replace("`", "")
+    # Headings -> plain line
+    t = re.sub(r"(?m)^\s{0,3}#{1,6}\s*", "", t)
+    # Blockquotes
+    t = re.sub(r"(?m)^\s{0,3}>\s?", "", t)
+    # Markdown links [label](url) -> label (url)
+    t = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", r"\1 (\2)", t)
+    # Bold / italic emphasis
+    t = re.sub(r"\*\*(.+?)\*\*", r"\1", t)
+    t = re.sub(r"__(.+?)__", r"\1", t)
+    t = re.sub(r"\*(.+?)\*", r"\1", t)
+    t = re.sub(r"(?<!\w)_(.+?)_(?!\w)", r"\1", t)
+    # Horizontal rules
+    t = re.sub(r"(?m)^\s*([-*_])\1{2,}\s*$", "", t)
+    # Bullet markers -> clean bullet
+    t = re.sub(r"(?m)^(\s*)[-*+]\s+", r"\1• ", t)
+    # Strip any leftover markdown / math filler characters
+    t = t.replace("$", "")
+    t = re.sub(r"[*#`~]+", "", t)
+    # Tidy whitespace
+    t = re.sub(r"[ \t]+\n", "\n", t)
+    t = re.sub(r"\n{3,}", "\n\n", t)
+    return t.strip()
 
 
 # ---------------------------------------------------------------- models
@@ -110,6 +147,17 @@ class ChatIn(BaseModel):
     session_id: Optional[str] = None
 
 
+class GuestIn(BaseModel):
+    name: Optional[str] = None
+
+
+class PaymentIn(BaseModel):
+    category: str
+    total_amount: float
+    project_code: Optional[str] = None
+    method: str = "card"
+
+
 # ---------------------------------------------------------------- auth utils
 def make_token(user):
     payload = {"sub": user["id"], "role": user["role"],
@@ -119,7 +167,8 @@ def make_token(user):
 
 def public_user(u):
     return {"id": u["id"], "role": u["role"], "name": u.get("name"),
-            "email": u.get("email"), "phone": u.get("phone")}
+            "email": u.get("email"), "phone": u.get("phone"),
+            "is_guest": bool(u.get("is_guest", False))}
 
 
 async def get_user(authorization: Optional[str] = Header(None)):
@@ -193,6 +242,16 @@ async def otp_verify(body: OtpVerifyIn):
              "name": body.name or "Customer", "phone": phone,
              "created_at": iso(now())}
         await db.users.insert_one(dict(u))
+    return {"token": make_token(u), "user": public_user(u)}
+
+
+@api.post("/auth/guest")
+async def guest_login(body: GuestIn):
+    """Instant guest access — browse + AI assistant + Start Your Project, no OTP.
+    Service requests / complaints stay gated to onboarded clients."""
+    u = {"id": str(uuid.uuid4()), "role": "customer", "is_guest": True,
+         "name": (body.name or "").strip() or "Guest", "created_at": iso(now())}
+    await db.users.insert_one(dict(u))
     return {"token": make_token(u), "user": public_user(u)}
 
 
@@ -370,7 +429,10 @@ SYSTEM = (
     "interiors using Greenlam MFC HMR boards and Hettich hardware). Help customers with "
     "design ideas, material/finish suggestions, and rough cost estimates in Indian Rupees (INR). "
     "When estimating, give a clear ballpark range and note it is indicative, subject to a free "
-    "site measurement and 3D design. Be warm, concise, and practical. Use short paragraphs and bullet points."
+    "site measurement and 3D design. Be warm, concise, and practical. Use short paragraphs and simple bullet points. "
+    "IMPORTANT — formatting: reply in plain, natural text only. Do NOT use any Markdown. "
+    "Never use asterisks (*), hash/pound signs (#), backticks (`), underscores for emphasis, or dollar signs ($). "
+    "For lists, start each line with a simple hyphen. Always write money amounts in Indian Rupees using the ₹ symbol (e.g. ₹1,20,000)."
 )
 
 
@@ -387,6 +449,7 @@ async def ai_chat(body: ChatIn, u=Depends(get_user)):
     except Exception as e:
         logger.exception("AI error")
         raise HTTPException(502, f"AI service error: {e}")
+    reply = clean_reply(reply)
     await db.ai_chats.insert_one({"id": str(uuid.uuid4()), "session_id": sid,
                                   "user_id": u["id"], "role": "assistant",
                                   "text": reply, "created_at": iso(now())})
@@ -398,6 +461,46 @@ async def ai_history(sid: str, u=Depends(get_user)):
     msgs = await db.ai_chats.find({"session_id": sid, "user_id": u["id"]},
                                   {"_id": 0}).sort("created_at", 1).to_list(200)
     return msgs
+
+
+# ---------------------------------------------------------------- payments (booking)
+BOOKING_PCT = 10  # customers pay 10% of total project cost to start
+
+
+@api.post("/payments")
+async def create_payment(body: PaymentIn, u=Depends(get_user)):
+    """Records a 10% booking payment that kicks off a project.
+
+    This is a mock gateway (no real charge) but the record shape mirrors a real
+    PSP (Razorpay/Stripe) so it can be swapped in without touching the client."""
+    if body.total_amount <= 0:
+        raise HTTPException(400, "Enter a valid project cost")
+    amount = round(body.total_amount * BOOKING_PCT / 100, 2)
+    seq = await db.payments.count_documents({}) + 5001
+    rec = {
+        "id": str(uuid.uuid4()),
+        "receipt_no": f"IJ-PAY-{seq}",
+        "customer_id": u["id"],
+        "customer_name": u.get("name"),
+        "category": body.category,
+        "project_code": body.project_code,
+        "total_amount": round(body.total_amount, 2),
+        "booking_pct": BOOKING_PCT,
+        "amount": amount,
+        "currency": "INR",
+        "method": body.method,
+        "status": "paid",
+        "gateway": "mock",
+        "created_at": iso(now()),
+    }
+    await db.payments.insert_one(dict(rec))
+    return rec
+
+
+@api.get("/payments")
+async def list_payments(u=Depends(get_user)):
+    q = {} if u["role"] != "customer" else {"customer_id": u["id"]}
+    return await db.payments.find(q, {"_id": 0}).sort("created_at", -1).to_list(200)
 
 
 # ---------------------------------------------------------------- seed
@@ -467,9 +570,35 @@ async def seed():
     logger.info("Seed complete.")
 
 
+# Staff members who sign in with phone + OTP (primary login). Idempotent —
+# runs on every startup so access can be granted without wiping the database.
+STAFF_PHONES = [
+    {"phone": "9028597888", "name": "Yogesh", "role": "admin"},
+]
+
+
+async def ensure_core_accounts():
+    for s in STAFF_PHONES:
+        existing = await db.users.find_one({"phone": s["phone"]})
+        if existing:
+            # Promote any pre-existing customer record to its staff role.
+            if existing.get("role") != s["role"] or existing.get("is_guest"):
+                await db.users.update_one(
+                    {"id": existing["id"]},
+                    {"$set": {"role": s["role"], "is_guest": False,
+                              "name": existing.get("name") or s["name"]}})
+                logger.info("Granted %s access to %s", s["role"], s["phone"])
+            continue
+        await db.users.insert_one({"id": str(uuid.uuid4()), "role": s["role"],
+                                   "name": s["name"], "phone": s["phone"],
+                                   "created_at": iso(now())})
+        logger.info("Created %s staff account for %s", s["role"], s["phone"])
+
+
 @app.on_event("startup")
 async def on_start():
     await seed()
+    await ensure_core_accounts()
 
 
 app.include_router(api)

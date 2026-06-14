@@ -18,11 +18,12 @@ const HERO =
 type Mode = "customer" | "staff";
 
 export default function Login() {
-  const { loginEmail, requestOtp, verifyOtp } = useAuth();
+  const { loginEmail, requestOtp, verifyOtp, guestLogin } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
   const [mode, setMode] = useState<Mode>("customer");
+  const [staffEmailMode, setStaffEmailMode] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
@@ -34,6 +35,7 @@ export default function Login() {
 
   const reset = (m: Mode) => {
     setMode(m); setError(""); setOtpSent(false); setOtp(""); setDevCode(undefined);
+    setStaffEmailMode(false);
   };
 
   const doStaffLogin = async () => {
@@ -73,6 +75,77 @@ export default function Login() {
       setLoading(false);
     }
   };
+
+  const doGuest = async () => {
+    setError(""); setLoading(true);
+    try {
+      await guestLogin();
+      router.replace("/");
+    } catch (e: any) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const otpHint =
+    mode === "staff"
+      ? "Staff sign in with their registered mobile number and a one-time code."
+      : "We'll text a one-time code to verify your number.";
+
+  // Shared phone + OTP block, used by both customer and staff (primary method).
+  const phoneOtpBlock = (
+    <>
+      <Field
+        label="Phone number"
+        icon="phone"
+        testID="phone-input"
+        placeholder={mode === "staff" ? "Registered mobile number" : "9000000001"}
+        keyboardType="phone-pad"
+        editable={!otpSent}
+        value={phone}
+        onChangeText={setPhone}
+      />
+      {!otpSent && (
+        <Txt size={FS.sm} color={C.inkMute} style={{ marginTop: -S.md, marginBottom: S.lg }}>
+          {otpHint}
+        </Txt>
+      )}
+      {otpSent && (
+        <>
+          <Field
+            label="Enter OTP"
+            icon="key"
+            testID="otp-input"
+            placeholder="6-digit code"
+            keyboardType="number-pad"
+            maxLength={6}
+            value={otp}
+            onChangeText={setOtp}
+          />
+          {devCode ? (
+            <View style={styles.devNote} testID="dev-code-note">
+              <Feather name="info" size={14} color={C.warning} />
+              <Txt size={FS.sm} color={C.inkSoft} style={{ marginLeft: 6 }}>
+                Demo mode — your code is {devCode}
+              </Txt>
+            </View>
+          ) : null}
+        </>
+      )}
+      {error ? <Txt color={C.error} style={{ marginBottom: S.md }} testID="login-error">{error}</Txt> : null}
+      {!otpSent ? (
+        <Button title="Send OTP" onPress={doRequestOtp} loading={loading} testID="send-otp-button" />
+      ) : (
+        <>
+          <Button title="Verify & Continue" onPress={doVerifyOtp} loading={loading} testID="verify-otp-button" />
+          <Pressable onPress={() => { setOtpSent(false); setOtp(""); setDevCode(undefined); setError(""); }} style={{ marginTop: S.md, alignItems: "center" }}>
+            <Txt color={C.inkMute} size={FS.sm}>Change number</Txt>
+          </Pressable>
+        </>
+      )}
+    </>
+  );
 
   return (
     <View style={styles.root}>
@@ -127,72 +200,70 @@ export default function Login() {
           </View>
 
           {mode === "staff" ? (
-            <>
-              <Field
-                label="Email"
-                icon="mail"
-                testID="email-input"
-                placeholder="you@interiojunction.in"
-                autoCapitalize="none"
-                keyboardType="email-address"
-                value={email}
-                onChangeText={setEmail}
-              />
-              <Field
-                label="Password"
-                icon="lock"
-                testID="password-input"
-                placeholder="••••••••"
-                secureTextEntry
-                value={password}
-                onChangeText={setPassword}
-              />
-              {error ? <Txt color={C.error} style={{ marginBottom: S.md }} testID="login-error">{error}</Txt> : null}
-              <Button title="Sign In" onPress={doStaffLogin} loading={loading} testID="staff-login-button" />
-            </>
+            staffEmailMode ? (
+              <>
+                <Field
+                  label="Email"
+                  icon="mail"
+                  testID="email-input"
+                  placeholder="you@interiojunction.in"
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                  value={email}
+                  onChangeText={setEmail}
+                />
+                <Field
+                  label="Password"
+                  icon="lock"
+                  testID="password-input"
+                  placeholder="••••••••"
+                  secureTextEntry
+                  value={password}
+                  onChangeText={setPassword}
+                />
+                {error ? <Txt color={C.error} style={{ marginBottom: S.md }} testID="login-error">{error}</Txt> : null}
+                <Button title="Sign In" onPress={doStaffLogin} loading={loading} testID="staff-login-button" />
+                <Pressable
+                  testID="staff-otp-switch"
+                  onPress={() => { setStaffEmailMode(false); setError(""); }}
+                  style={{ marginTop: S.lg, alignItems: "center" }}
+                >
+                  <Txt color={C.inkSoft} size={FS.sm} weight="medium">Sign in with phone OTP instead</Txt>
+                </Pressable>
+              </>
+            ) : (
+              <>
+                {phoneOtpBlock}
+                <Pressable
+                  testID="staff-email-switch"
+                  onPress={() => { setStaffEmailMode(true); setOtpSent(false); setOtp(""); setDevCode(undefined); setError(""); }}
+                  style={{ marginTop: S.lg, alignItems: "center" }}
+                >
+                  <Txt color={C.inkSoft} size={FS.sm} weight="medium">Sign in with email & password instead</Txt>
+                </Pressable>
+              </>
+            )
           ) : (
             <>
-              <Field
-                label="Phone number"
-                icon="phone"
-                testID="phone-input"
-                placeholder="9000000001"
-                keyboardType="phone-pad"
-                editable={!otpSent}
-                value={phone}
-                onChangeText={setPhone}
-              />
-              {otpSent && (
+              {phoneOtpBlock}
+              {!otpSent && (
                 <>
-                  <Field
-                    label="Enter OTP"
-                    icon="key"
-                    testID="otp-input"
-                    placeholder="6-digit code"
-                    keyboardType="number-pad"
-                    maxLength={6}
-                    value={otp}
-                    onChangeText={setOtp}
+                  <View style={styles.dividerRow}>
+                    <View style={styles.divLine} />
+                    <Txt size={FS.sm} color={C.inkMute} style={{ marginHorizontal: S.md }}>or</Txt>
+                    <View style={styles.divLine} />
+                  </View>
+                  <Button
+                    title="Continue as Guest"
+                    variant="outline"
+                    icon="arrow-right-circle"
+                    onPress={doGuest}
+                    loading={loading}
+                    testID="guest-login-button"
                   />
-                  {devCode ? (
-                    <View style={styles.devNote} testID="dev-code-note">
-                      <Feather name="info" size={14} color={C.warning} />
-                      <Txt size={FS.sm} color={C.inkSoft} style={{ marginLeft: 6 }}>
-                        Demo mode — your code is {devCode}
-                      </Txt>
-                    </View>
-                  ) : null}
-                </>
-              )}
-              {error ? <Txt color={C.error} style={{ marginBottom: S.md }} testID="login-error">{error}</Txt> : null}
-              {!otpSent ? (
-                <Button title="Send OTP" onPress={doRequestOtp} loading={loading} testID="send-otp-button" />
-              ) : (
-                <>
-                  <Button title="Verify & Continue" onPress={doVerifyOtp} loading={loading} testID="verify-otp-button" />
-                  <Pressable onPress={() => reset("customer")} style={{ marginTop: S.md, alignItems: "center" }}>
-                    <Txt color={C.inkMute} size={FS.sm}>Change number</Txt>
-                  </Pressable>
+                  <Txt size={FS.sm} color={C.inkMute} style={{ textAlign: "center", marginTop: S.md }}>
+                    Explore the app & start a project instantly — no phone number needed.
+                  </Txt>
                 </>
               )}
             </>
@@ -224,4 +295,6 @@ const styles = StyleSheet.create({
     flexDirection: "row", alignItems: "center", backgroundColor: C.tint,
     borderRadius: R.md, padding: S.md, marginBottom: S.lg,
   },
+  dividerRow: { flexDirection: "row", alignItems: "center", marginVertical: S.lg },
+  divLine: { flex: 1, height: StyleSheet.hairlineWidth, backgroundColor: C.borderStrong },
 });
