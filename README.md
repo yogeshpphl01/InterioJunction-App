@@ -63,7 +63,17 @@ Other pre-seeded staff (to inspect every surface): `admin@interiojunction.in / A
 > In demo mode the customer OTP screen also auto-fills the dev code, and the master code `1234567890`
 > is accepted for any number. Both behaviors are disabled when `DEMO_MODE=false`.
 
-## Website-parity actions
-The two public actions from the website are built in: **Get a Free Quote** and **Request a Callback**
-(login screen *and* customer home). Submissions post to `POST /public/quote` and `POST /public/callback`
-and land in the staff **Leads** CRM (tagged `app-quote` / `app-callback`).
+## Website parity (matched to interiojunction.in)
+- **Brand:** terracotta (`#C2632E`) primary CTAs + forest green (`#2E4034`) contact accents + espresso-brown
+  text on warm cream (`#FAF5EE`); Playfair Display + DM Sans; "Interiojunction · FACTORY-DIRECT · PUNE"
+  wordmark (`src/components/Brand.tsx`). All tokens live in `src/theme.ts` / `src/brand.ts`.
+- **Kitchen Calculator** (`app/(customer)/calculator.tsx`): the site's 3-step estimator
+  (Layout → Dimensions → Finish & Add-ons) with a live, clearly *indicative* ₹ estimate panel, funneling to
+  "Book Free 3D Design" and "WhatsApp Us".
+- **Get a Free Quote** + **Request a Callback** (`LeadSheet.tsx`, login + home) → `POST /public/quote` /
+  `POST /public/callback` → staff **Leads** CRM (tagged `app-quote` / `app-callback`).
+- **Call / WhatsApp** the real number **+91 86699 90234** — floating WhatsApp FAB (`WhatsAppFab.tsx`) on
+  login/home, and working Call/WhatsApp rows on the Profile screen.
+
+> Still want closer fidelity? Drop the real **logo** into `frontend/assets/brand/` (and tell me) and I'll
+> swap the text wordmark for the actual mark, plus mirror any remaining pages (Pricing, Packages, Journal).

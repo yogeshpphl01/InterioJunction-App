@@ -24,15 +24,10 @@ import { useAuth } from "@/src/auth";
 import { Txt, Loading, Empty, StatusPill, Button } from "@/src/components/ui";
 import { Header } from "@/src/components/Header";
 import { LeadSheet, LeadMode } from "@/src/components/LeadSheet";
+import { WhatsAppFab } from "@/src/components/WhatsAppFab";
 import { stageLabel } from "@/src/constants";
+import { SERVICES } from "@/src/brand";
 import { C, S, R, FS, shadow } from "@/src/theme";
-
-// Services offered (matches interiojunction.in + backend seed categories).
-const SERVICES = [
-  { title: "Modular Kitchen", img: "https://images.unsplash.com/photo-1663811396777-05505d999151?crop=entropy&cs=srgb&fm=jpg&q=85&w=800" },
-  { title: "Modular Wardrobe", img: "https://images.unsplash.com/photo-1708397016786-8916880649b8?crop=entropy&cs=srgb&fm=jpg&q=85&w=800" },
-  { title: "Full Home Interior", img: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?crop=entropy&cs=srgb&fm=jpg&q=85&w=800" },
-];
 
 export default function CustomerHome() {
   const { user } = useAuth();
@@ -74,20 +69,34 @@ export default function CustomerHome() {
 
           {/* <section id="lead-cta" purpose="Website-parity Quote + Callback actions" /> */}
           <View style={styles.ctaRow}>
-            <Button title="Get a Free Quote" icon="file-text" onPress={() => setLeadMode("quote")}
-              style={{ flex: 1 }} testID="cta-quote" />
-            <Button title="Callback" icon="phone-call" variant="outline" onPress={() => setLeadMode("callback")}
+            <Button title="Free Consultation" icon="calendar" onPress={() => setLeadMode("callback")}
               style={{ flex: 1 }} testID="cta-callback" />
+            <Button title="Free Quote" icon="file-text" variant="outline" onPress={() => setLeadMode("quote")}
+              style={{ flex: 1 }} testID="cta-quote" />
           </View>
 
+          {/* <section id="calculator-promo" purpose="Entry to the website-parity Kitchen Calculator" /> */}
+          <Pressable testID="calc-promo" onPress={() => router.push("/(customer)/calculator")} style={styles.calcCard}>
+            <View style={styles.calcIcon}><Feather name="grid" size={18} color={C.brand} /></View>
+            <View style={{ flex: 1 }}>
+              <Txt weight="bold" size={FS.lg} color={C.ink}>Kitchen Calculator</Txt>
+              <Txt size={FS.sm} color={C.inkSoft}>Get an instant indicative estimate in 3 steps</Txt>
+            </View>
+            <Feather name="arrow-right" size={20} color={C.brand} />
+          </Pressable>
+
           {/* <section id="services" purpose="Service showcase carousel (kitchen/wardrobe/full home)" /> */}
-          <Txt display size={FS.xl} style={{ marginTop: S.xl, marginBottom: S.md }}>What we do</Txt>
+          <Txt display size={FS.xl} style={{ marginTop: S.xl, marginBottom: S.md }}>Spaces we craft</Txt>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: S.md, paddingRight: S.xl }}>
             {SERVICES.map((s) => (
               <Pressable key={s.title} testID={`service-${s.title}`} onPress={() => setLeadMode("quote")} style={styles.serviceCard}>
                 <Image source={{ uri: s.img }} style={StyleSheet.absoluteFill} contentFit="cover" transition={250} />
-                <LinearGradient colors={["transparent", "rgba(26,26,26,0.92)"]} style={StyleSheet.absoluteFill} />
-                <Txt weight="medium" color={C.onInverse} style={styles.serviceLabel}>{s.title}</Txt>
+                <LinearGradient colors={["transparent", "rgba(44,32,24,0.94)"]} style={StyleSheet.absoluteFill} />
+                <View style={styles.serviceTag}><Txt size={FS.sm} weight="bold" color={C.onBrand}>{s.tag}</Txt></View>
+                <View style={styles.serviceBody}>
+                  <Txt display size={FS.lg} color={C.onInverse}>{s.title}</Txt>
+                  <Txt size={FS.sm} color="rgba(253,250,246,0.82)" numberOfLines={2} style={{ marginTop: 2 }}>{s.blurb}</Txt>
+                </View>
               </Pressable>
             ))}
           </ScrollView>
@@ -122,6 +131,9 @@ export default function CustomerHome() {
         </ScrollView>
       )}
 
+      {/* <section id="contact-fab" purpose="Persistent WhatsApp action (website parity)" /> */}
+      <WhatsAppFab bottom={insets.bottom + 70} />
+
       {/* <section id="lead-sheet" purpose="Quote/Callback capture modal" /> */}
       <LeadSheet visible={leadMode !== null} mode={leadMode ?? "quote"} onClose={() => setLeadMode(null)} />
     </View>
@@ -132,8 +144,11 @@ const styles = StyleSheet.create({
   aiCard: { flexDirection: "row", alignItems: "center", backgroundColor: C.inverse, borderRadius: R.lg, padding: S.lg, marginBottom: S.lg, ...shadow },
   aiIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: "rgba(253,250,246,0.15)", alignItems: "center", justifyContent: "center", marginRight: S.md },
   ctaRow: { flexDirection: "row", gap: S.md },
-  serviceCard: { width: 150, height: 190, borderRadius: R.lg, overflow: "hidden", justifyContent: "flex-end", ...shadow },
-  serviceLabel: { padding: S.md },
+  calcCard: { flexDirection: "row", alignItems: "center", backgroundColor: C.surface2, borderRadius: R.lg, borderWidth: 1, borderColor: C.border, padding: S.lg, marginTop: S.lg, ...shadow },
+  calcIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: C.brandSoft, alignItems: "center", justifyContent: "center", marginRight: S.md },
+  serviceCard: { width: 220, height: 250, borderRadius: R.lg, overflow: "hidden", justifyContent: "flex-end", ...shadow },
+  serviceTag: { position: "absolute", top: S.md, left: S.md, backgroundColor: C.brand, paddingHorizontal: S.md, height: 28, borderRadius: R.pill, alignItems: "center", justifyContent: "center" },
+  serviceBody: { padding: S.lg },
   projCard: { backgroundColor: C.surface2, borderRadius: R.lg, borderWidth: 1, borderColor: C.border, overflow: "hidden", marginBottom: S.lg, ...shadow },
   projHero: { height: 150, justifyContent: "flex-end" },
   projHeroBody: { padding: S.md, alignItems: "flex-start" },

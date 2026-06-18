@@ -23,6 +23,8 @@ import { Feather } from "@expo/vector-icons";
 import { useAuth } from "@/src/auth";
 import { Txt, Button, Field } from "@/src/components/ui";
 import { LeadSheet, LeadMode } from "@/src/components/LeadSheet";
+import { Brand } from "@/src/components/Brand";
+import { WhatsAppFab } from "@/src/components/WhatsAppFab";
 import { C, S, R, FS } from "@/src/theme";
 
 const HERO =
@@ -93,12 +95,7 @@ export default function Login() {
       <ImageBackground source={{ uri: HERO }} style={[styles.hero, { paddingTop: insets.top }]}>
         <LinearGradient colors={["rgba(0,0,0,0.25)", "rgba(26,26,26,0.95)"]} style={StyleSheet.absoluteFill} />
         <View style={styles.heroContent}>
-          <Txt size={FS.sm} weight="medium" color="rgba(253,250,246,0.85)" style={{ letterSpacing: 3 }}>
-            FACTORY-DIRECT INTERIORS
-          </Txt>
-          <Txt display size={42} color={C.onInverse} style={{ marginTop: S.sm, lineHeight: 48 }}>
-            Interiojunction
-          </Txt>
+          <Brand size={40} onDark />
         </View>
       </ImageBackground>
 
@@ -228,6 +225,7 @@ export default function Login() {
         </ScrollView>
       </KeyboardAvoidingView>
 
+      <WhatsAppFab bottom={24} />
       <LeadSheet visible={leadMode !== null} mode={leadMode ?? "quote"} onClose={() => setLeadMode(null)} />
     </View>
   );
@@ -249,7 +247,7 @@ const styles = StyleSheet.create({
     flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center",
     height: 44, borderRadius: R.md - 2,
   },
-  toggleActive: { backgroundColor: C.ink },
+  toggleActive: { backgroundColor: C.brand },
   devNote: {
     flexDirection: "row", alignItems: "center", backgroundColor: C.tint,
     borderRadius: R.md, padding: S.md, marginBottom: S.lg,

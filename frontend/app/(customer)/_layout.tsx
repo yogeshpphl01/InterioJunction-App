@@ -1,11 +1,11 @@
 /**
  * <layout group="(customer)" nav="bottom-tabs" role="customer">
- *   <tabs>Home (index) · Support (tickets) · Design AI (assistant) · Profile</tabs>
+ *   <tabs>Home (index) · Estimate (calculator) · Design AI (assistant) · Support (tickets) · Profile</tabs>
  * </layout>
  */
 import React from "react";
 import { Tabs } from "expo-router";
-import { Feather } from "@expo/vector-icons";
+import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { C, F } from "@/src/theme";
@@ -29,8 +29,9 @@ export default function CustomerLayout() {
       }}
     >
       <Tabs.Screen name="index" options={{ title: "Home", tabBarIcon: ({ color, size }) => <Feather name="home" size={size} color={color} /> }} />
-      <Tabs.Screen name="tickets" options={{ title: "Support", tabBarIcon: ({ color, size }) => <Feather name="life-buoy" size={size} color={color} /> }} />
+      <Tabs.Screen name="calculator" options={{ title: "Estimate", tabBarIcon: ({ color, size }) => <MaterialIcons name="calculate" size={size} color={color} /> }} />
       <Tabs.Screen name="assistant" options={{ title: "Design AI", tabBarIcon: ({ color, size }) => <Feather name="message-circle" size={size} color={color} /> }} />
+      <Tabs.Screen name="tickets" options={{ title: "Support", tabBarIcon: ({ color, size }) => <Feather name="life-buoy" size={size} color={color} /> }} />
       <Tabs.Screen name="profile" options={{ title: "Profile", tabBarIcon: ({ color, size }) => <Feather name="user" size={size} color={color} /> }} />
     </Tabs>
   );
