@@ -1,3 +1,13 @@
+/**
+ * <root-layout name="RootLayout" framework="expo-router">
+ *   <purpose>
+ *     App shell. Loads brand + icon fonts, holds the native splash until ready,
+ *     and wraps the whole tree in providers: GestureHandler → SafeArea → Auth.
+ *     The Stack renders the active route group: index gate, /login, role tabs.
+ *   </purpose>
+ *   <providers>GestureHandlerRootView · SafeAreaProvider · AuthProvider</providers>
+ * </root-layout>
+ */
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";

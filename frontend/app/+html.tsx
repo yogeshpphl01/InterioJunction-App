@@ -1,4 +1,10 @@
 // @ts-nocheck
+/**
+ * <html-shell name="Root" platform="web-only">
+ *   Wraps every web page (expo-router static render). Sets viewport/meta and
+ *   disables body scroll so RN ScrollViews behave. Not used on native.
+ * </html-shell>
+ */
 import { ScrollViewStyleReset } from "expo-router/html";
 import type { PropsWithChildren } from "react";
 

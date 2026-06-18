@@ -1,3 +1,14 @@
+/**
+ * <screen route="/project/[code]" name="ProjectDetail" role="any (object-scoped)">
+ *   <purpose>
+ *     Single project view: hero, production timeline, parts breakdown by stage,
+ *     and any service tickets. Backend enforces customer object-scoping (404 on
+ *     cross-customer access).
+ *   </purpose>
+ *   <data>GET /projects/{code}</data>
+ *   <sections>hero · production-timeline · parts-breakdown · service-tickets</sections>
+ * </screen>
+ */
 import React, { useEffect, useState, useCallback } from "react";
 import { View, ScrollView, StyleSheet, RefreshControl } from "react-native";
 import { Image } from "expo-image";

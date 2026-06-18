@@ -1,3 +1,10 @@
+/**
+ * <screen route="/(staff)" name="StaffDashboard" role="admin|sales|factory">
+ *   <purpose>KPI cards (projects/tickets/leads/scans) + active projects list.</purpose>
+ *   <data>GET /dashboard · GET /projects (loaded in parallel)</data>
+ *   <sections>kpi-grid · active-projects</sections>
+ * </screen>
+ */
 import React, { useEffect, useState, useCallback } from "react";
 import { View, ScrollView, StyleSheet, RefreshControl, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";

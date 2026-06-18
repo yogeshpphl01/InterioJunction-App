@@ -1,3 +1,8 @@
+/**
+ * <route route="/(staff)/projects" role="admin|sales">
+ *   Project list WITH create (showCreate) using the shared ProjectsList.
+ * </route>
+ */
 import React from "react";
 import ProjectsList from "@/src/screens/ProjectsList";
 

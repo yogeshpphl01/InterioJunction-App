@@ -1,3 +1,11 @@
+/**
+ * <screen route="/(staff)/tickets" name="StaffTickets" role="admin|sales|factory">
+ *   <purpose>Support queue — filter by status; optimistic status changes
+ *     (resolve/close/reopen) via PATCH /tickets/{id}.</purpose>
+ *   <data>GET /tickets · PATCH /tickets/{id}</data>
+ *   <sections>filter-chips · ticket-list (with inline status actions)</sections>
+ * </screen>
+ */
 import React, { useEffect, useState, useCallback } from "react";
 import { View, ScrollView, StyleSheet, RefreshControl, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";

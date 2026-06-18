@@ -1,3 +1,8 @@
+/**
+ * <layout group="(factory)" nav="bottom-tabs" role="factory">
+ *   <tabs>Scan (index) · Projects · Profile</tabs>
+ * </layout>
+ */
 import React from "react";
 import { Tabs } from "expo-router";
 import { Feather } from "@expo/vector-icons";

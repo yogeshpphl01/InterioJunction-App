@@ -1,3 +1,10 @@
+/**
+ * <screen route="/(customer)/assistant" name="Assistant" role="customer">
+ *   <purpose>AI design/quote chat (₹ estimates) backed by POST /ai/chat (gpt-4o).</purpose>
+ *   <data>session_id persisted in state; messages held in component state.</data>
+ *   <sections>intro+suggestions · message-bubbles · input-bar</sections>
+ * </screen>
+ */
 import React, { useState, useRef, useCallback } from "react";
 import {
   View, StyleSheet, KeyboardAvoidingView, Platform, ScrollView,

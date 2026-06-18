@@ -1,3 +1,9 @@
+/**
+ * <component name="StageTimeline" layer="frontend" kind="visualization">
+ *   <purpose>Vertical NEW→…→SITE production tracker. Marks each stage done /
+ *     active / pending relative to the project's current stage.</purpose>
+ * </component>
+ */
 import React from "react";
 import { View, StyleSheet } from "react-native";
 import { Feather } from "@expo/vector-icons";

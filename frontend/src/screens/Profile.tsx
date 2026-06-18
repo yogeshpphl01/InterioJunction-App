@@ -1,5 +1,12 @@
+/**
+ * <screen name="Profile" layer="frontend" role="any (shared)">
+ *   <purpose>Role-agnostic profile: avatar/initials, name/role/contact, settings
+ *     rows (static), and sign out. Bound by each role's profile route.</purpose>
+ *   <data>useAuth() (user, logout)</data>
+ * </screen>
+ */
 import React from "react";
-import { View, ScrollView, StyleSheet, Pressable } from "react-native";
+import { View, ScrollView, StyleSheet, Pressable, Linking } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -8,6 +15,7 @@ import { useAuth } from "@/src/auth";
 import { Txt, Card, Button } from "@/src/components/ui";
 import { Header } from "@/src/components/Header";
 import { ROLE_LABEL } from "@/src/constants";
+import { BRAND, waUrl, telUrl } from "@/src/brand";
 import { C, S, R, FS } from "@/src/theme";
 
 export default function Profile() {
@@ -31,6 +39,26 @@ export default function Profile() {
           {user?.phone ? <Txt color={C.inkMute} style={{ marginTop: S.sm }}>+91 {user.phone}</Txt> : null}
         </Card>
 
+        {/* <section id="contact" purpose="Website-parity Call + WhatsApp actions" /> */}
+        <Card style={{ marginTop: S.lg, padding: 0 }}>
+          <Pressable testID="contact-call" onPress={() => Linking.openURL(telUrl())} style={styles.row}>
+            <View style={[styles.rowIcon, { backgroundColor: C.forest }]}><Feather name="phone" size={16} color={C.onForest} /></View>
+            <View style={{ flex: 1 }}>
+              <Txt weight="medium">Call us</Txt>
+              <Txt size={FS.sm} color={C.inkMute}>{BRAND.phoneDisplay}</Txt>
+            </View>
+            <Feather name="chevron-right" size={18} color={C.inkMute} />
+          </Pressable>
+          <Pressable testID="contact-whatsapp" onPress={() => Linking.openURL(waUrl()).catch(() => Linking.openURL(telUrl()))} style={[styles.row, { borderBottomWidth: 0 }]}>
+            <View style={[styles.rowIcon, { backgroundColor: "#25D366" }]}><Feather name="message-circle" size={16} color="#FFFFFF" /></View>
+            <View style={{ flex: 1 }}>
+              <Txt weight="medium">Chat on WhatsApp</Txt>
+              <Txt size={FS.sm} color={C.inkMute}>Quick replies from our team</Txt>
+            </View>
+            <Feather name="chevron-right" size={18} color={C.inkMute} />
+          </Pressable>
+        </Card>
+
         <Card style={{ marginTop: S.lg, padding: 0 }}>
           {[
             { icon: "shield", label: "Account security" },
@@ -49,8 +77,8 @@ export default function Profile() {
           <Button title="Sign Out" variant="outline" icon="log-out" testID="logout-button"
             onPress={async () => { await logout(); router.replace("/login"); }} />
         </View>
-        <Txt size={FS.sm} color={C.inkMute} style={{ textAlign: "center", marginTop: S.xl }}>
-          Interiojunction · Factory-direct interiors
+        <Txt size={FS.sm} color={C.inkMute} style={{ textAlign: "center", marginTop: S.xl, letterSpacing: 0.5 }}>
+          {BRAND.name} · {BRAND.tagline}
         </Txt>
       </ScrollView>
     </View>

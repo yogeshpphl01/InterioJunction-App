@@ -1,3 +1,9 @@
+/**
+ * <component name="Header" layer="frontend" kind="chrome">
+ *   <purpose>Sticky, SafeArea-aware screen header (title + optional subtitle,
+ *     back button, right slot) used across every role screen.</purpose>
+ * </component>
+ */
 import React from "react";
 import { View, StyleSheet, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
