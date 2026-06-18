@@ -1,3 +1,16 @@
+/**
+ * <screen route="/(customer)" name="CustomerHome" role="customer">
+ *   <purpose>
+ *     The customer landing screen. Mirrors interiojunction.in's homepage intent:
+ *     brand hero + services showcase + the two primary conversion actions
+ *     ("Get a Free Quote", "Request a Callback") + the customer's own project
+ *     tracking cards.
+ *   </purpose>
+ *   <data>GET /projects (object-scoped to this customer)</data>
+ *   <sections>ai-promo · lead-cta · services · projects</sections>
+ *   <navigation>Tap a project → /project/[code]; AI promo → /(customer)/assistant</navigation>
+ * </screen>
+ */
 import React, { useEffect, useState, useCallback } from "react";
 import { View, ScrollView, StyleSheet, Pressable, RefreshControl } from "react-native";
 import { Image } from "expo-image";
@@ -8,10 +21,18 @@ import { Feather } from "@expo/vector-icons";
 
 import { api } from "@/src/api";
 import { useAuth } from "@/src/auth";
-import { Txt, Card, Loading, Empty, StatusPill } from "@/src/components/ui";
+import { Txt, Card, Loading, Empty, StatusPill, Button } from "@/src/components/ui";
 import { Header } from "@/src/components/Header";
+import { LeadSheet, LeadMode } from "@/src/components/LeadSheet";
 import { stageLabel } from "@/src/constants";
 import { C, S, R, FS, shadow } from "@/src/theme";
+
+// Services offered (matches interiojunction.in + backend seed categories).
+const SERVICES = [
+  { title: "Modular Kitchen", img: "https://images.unsplash.com/photo-1663811396777-05505d999151?crop=entropy&cs=srgb&fm=jpg&q=85&w=800" },
+  { title: "Modular Wardrobe", img: "https://images.unsplash.com/photo-1708397016786-8916880649b8?crop=entropy&cs=srgb&fm=jpg&q=85&w=800" },
+  { title: "Full Home Interior", img: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?crop=entropy&cs=srgb&fm=jpg&q=85&w=800" },
+];
 
 export default function CustomerHome() {
   const { user } = useAuth();
@@ -20,12 +41,13 @@ export default function CustomerHome() {
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [leadMode, setLeadMode] = useState<LeadMode | null>(null); // which lead sheet is open
 
   const load = useCallback(async () => {
     try {
       const res = await api<any[]>("/projects");
       setProjects(res);
-    } catch { /* ignore */ }
+    } catch { /* ignore — offline/empty handled by UI */ }
     finally { setLoading(false); setRefreshing(false); }
   }, []);
 
@@ -40,6 +62,7 @@ export default function CustomerHome() {
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={C.ink} />}
           showsVerticalScrollIndicator={false}
         >
+          {/* <section id="ai-promo" purpose="Entry to AI design/quote assistant" /> */}
           <Pressable testID="ai-promo" onPress={() => router.push("/(customer)/assistant")} style={styles.aiCard}>
             <View style={styles.aiIcon}><Feather name="zap" size={18} color={C.onBrand} /></View>
             <View style={{ flex: 1 }}>
@@ -49,9 +72,31 @@ export default function CustomerHome() {
             <Feather name="arrow-right" size={20} color={C.onInverse} />
           </Pressable>
 
+          {/* <section id="lead-cta" purpose="Website-parity Quote + Callback actions" /> */}
+          <View style={styles.ctaRow}>
+            <Button title="Get a Free Quote" icon="file-text" onPress={() => setLeadMode("quote")}
+              style={{ flex: 1 }} testID="cta-quote" />
+            <Button title="Callback" icon="phone-call" variant="outline" onPress={() => setLeadMode("callback")}
+              style={{ flex: 1 }} testID="cta-callback" />
+          </View>
+
+          {/* <section id="services" purpose="Service showcase carousel (kitchen/wardrobe/full home)" /> */}
+          <Txt display size={FS.xl} style={{ marginTop: S.xl, marginBottom: S.md }}>What we do</Txt>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: S.md, paddingRight: S.xl }}>
+            {SERVICES.map((s) => (
+              <Pressable key={s.title} testID={`service-${s.title}`} onPress={() => setLeadMode("quote")} style={styles.serviceCard}>
+                <Image source={{ uri: s.img }} style={StyleSheet.absoluteFill} contentFit="cover" transition={250} />
+                <LinearGradient colors={["transparent", "rgba(26,26,26,0.92)"]} style={StyleSheet.absoluteFill} />
+                <Txt weight="medium" color={C.onInverse} style={styles.serviceLabel}>{s.title}</Txt>
+              </Pressable>
+            ))}
+          </ScrollView>
+
+          {/* <section id="projects" purpose="Customer's own project tracking cards" /> */}
+          <Txt display size={FS.xl} style={{ marginTop: S.xl, marginBottom: S.md }}>Your projects</Txt>
           {projects.length === 0 ? (
             <Empty icon="layout" title="No active projects yet"
-              subtitle="Chat with our AI Design Assistant to get a free quote and start your interior journey." />
+              subtitle="Get a free quote or chat with our AI Design Assistant to start your interior journey." />
           ) : (
             projects.map((p) => (
               <Pressable key={p.id} testID={`project-card-${p.project_code}`} onPress={() => router.push(`/project/${p.project_code}`)} style={styles.projCard}>
@@ -76,13 +121,19 @@ export default function CustomerHome() {
           )}
         </ScrollView>
       )}
+
+      {/* <section id="lead-sheet" purpose="Quote/Callback capture modal" /> */}
+      <LeadSheet visible={leadMode !== null} mode={leadMode ?? "quote"} onClose={() => setLeadMode(null)} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  aiCard: { flexDirection: "row", alignItems: "center", backgroundColor: C.inverse, borderRadius: R.lg, padding: S.lg, marginBottom: S.xl, ...shadow },
+  aiCard: { flexDirection: "row", alignItems: "center", backgroundColor: C.inverse, borderRadius: R.lg, padding: S.lg, marginBottom: S.lg, ...shadow },
   aiIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: "rgba(253,250,246,0.15)", alignItems: "center", justifyContent: "center", marginRight: S.md },
+  ctaRow: { flexDirection: "row", gap: S.md },
+  serviceCard: { width: 150, height: 190, borderRadius: R.lg, overflow: "hidden", justifyContent: "flex-end", ...shadow },
+  serviceLabel: { padding: S.md },
   projCard: { backgroundColor: C.surface2, borderRadius: R.lg, borderWidth: 1, borderColor: C.border, overflow: "hidden", marginBottom: S.lg, ...shadow },
   projHero: { height: 150, justifyContent: "flex-end" },
   projHeroBody: { padding: S.md, alignItems: "flex-start" },

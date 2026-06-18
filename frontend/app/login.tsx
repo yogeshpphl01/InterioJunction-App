@@ -1,3 +1,15 @@
+/**
+ * <screen route="/login" name="Login" access="public">
+ *   <purpose>
+ *     Premium gateway with two auth modes:
+ *       - customer : phone → OTP (mocked SMS; dev code echoed in DEMO_MODE)
+ *       - staff    : email + password (bcrypt)
+ *     Also exposes the website's public lead actions (Quote / Callback) so a
+ *     visitor can convert before ever creating an account.
+ *   </purpose>
+ *   <sections>hero · mode-toggle · staff-form · customer-otp-form · public-lead-cta</sections>
+ * </screen>
+ */
 import React, { useState } from "react";
 import {
   View, StyleSheet, KeyboardAvoidingView, Platform, ScrollView,
@@ -10,6 +22,7 @@ import { Feather } from "@expo/vector-icons";
 
 import { useAuth } from "@/src/auth";
 import { Txt, Button, Field } from "@/src/components/ui";
+import { LeadSheet, LeadMode } from "@/src/components/LeadSheet";
 import { C, S, R, FS } from "@/src/theme";
 
 const HERO =
@@ -31,6 +44,7 @@ export default function Login() {
   const [devCode, setDevCode] = useState<string | undefined>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [leadMode, setLeadMode] = useState<LeadMode | null>(null); // public quote/callback sheet
 
   const reset = (m: Mode) => {
     setMode(m); setError(""); setOtpSent(false); setOtp(""); setDevCode(undefined);
@@ -168,9 +182,9 @@ export default function Login() {
                     label="Enter OTP"
                     icon="key"
                     testID="otp-input"
-                    placeholder="6-digit code"
+                    placeholder="Enter the code"
                     keyboardType="number-pad"
-                    maxLength={6}
+                    maxLength={10}
                     value={otp}
                     onChangeText={setOtp}
                   />
@@ -197,8 +211,24 @@ export default function Login() {
               )}
             </>
           )}
+
+          {/* <section id="public-lead-cta" purpose="Convert visitors without an account (website parity)" /> */}
+          <View style={styles.leadCta}>
+            <View style={styles.divider} />
+            <Txt size={FS.sm} color={C.inkMute} style={{ textAlign: "center", marginBottom: S.md }}>
+              Not ready to sign in?
+            </Txt>
+            <View style={{ flexDirection: "row", gap: S.md }}>
+              <Button title="Free Quote" icon="file-text" variant="ghost"
+                onPress={() => setLeadMode("quote")} style={{ flex: 1 }} testID="login-cta-quote" />
+              <Button title="Callback" icon="phone-call" variant="ghost"
+                onPress={() => setLeadMode("callback")} style={{ flex: 1 }} testID="login-cta-callback" />
+            </View>
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      <LeadSheet visible={leadMode !== null} mode={leadMode ?? "quote"} onClose={() => setLeadMode(null)} />
     </View>
   );
 }
@@ -224,4 +254,6 @@ const styles = StyleSheet.create({
     flexDirection: "row", alignItems: "center", backgroundColor: C.tint,
     borderRadius: R.md, padding: S.md, marginBottom: S.lg,
   },
+  leadCta: { marginTop: S.xl },
+  divider: { height: StyleSheet.hairlineWidth, backgroundColor: C.border, marginBottom: S.lg },
 });
