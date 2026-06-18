@@ -21,7 +21,7 @@ import { Feather } from "@expo/vector-icons";
 
 import { api } from "@/src/api";
 import { useAuth } from "@/src/auth";
-import { Txt, Card, Loading, Empty, StatusPill, Button } from "@/src/components/ui";
+import { Txt, Loading, Empty, StatusPill, Button } from "@/src/components/ui";
 import { Header } from "@/src/components/Header";
 import { LeadSheet, LeadMode } from "@/src/components/LeadSheet";
 import { stageLabel } from "@/src/constants";
