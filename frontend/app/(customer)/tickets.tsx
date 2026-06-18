@@ -1,3 +1,10 @@
+/**
+ * <screen route="/(customer)/tickets" name="Tickets" role="customer">
+ *   <purpose>List + create service tickets (object-scoped to this customer).</purpose>
+ *   <data>GET /tickets · POST /tickets</data>
+ *   <sections>ticket-list · new-request-modal (type chips, subject, details)</sections>
+ * </screen>
+ */
 import React, { useEffect, useState, useCallback } from "react";
 import {
   View, ScrollView, StyleSheet, Pressable, RefreshControl, Modal,

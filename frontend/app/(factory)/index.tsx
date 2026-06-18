@@ -1,3 +1,15 @@
+/**
+ * <screen route="/(factory)" name="Scanner" role="factory">
+ *   <purpose>
+ *     Scan QR part labels (expo-camera) or type a code to advance a part to the
+ *     next production stage. Includes a debounce/cooldown to prevent double
+ *     advances, plus a recent-scans feed.
+ *   </purpose>
+ *   <data>POST /scan · GET /scan/recent</data>
+ *   <sections>camera/permission-gate · manual-entry · recent-scans</sections>
+ *   <perf>No glassmorphism here (per design guidelines) — scan-first performance.</perf>
+ * </screen>
+ */
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import {
   View, StyleSheet, Pressable, ScrollView, Linking, TextInput, Platform,

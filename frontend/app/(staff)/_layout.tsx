@@ -1,3 +1,8 @@
+/**
+ * <layout group="(staff)" nav="bottom-tabs" role="admin|sales|factory">
+ *   <tabs>Dashboard (index) · Projects · Tickets · Leads · Profile</tabs>
+ * </layout>
+ */
 import React from "react";
 import { Tabs } from "expo-router";
 import { Feather } from "@expo/vector-icons";

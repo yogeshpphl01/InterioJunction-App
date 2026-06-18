@@ -1,3 +1,10 @@
+/**
+ * <screen name="Profile" layer="frontend" role="any (shared)">
+ *   <purpose>Role-agnostic profile: avatar/initials, name/role/contact, settings
+ *     rows (static), and sign out. Bound by each role's profile route.</purpose>
+ *   <data>useAuth() (user, logout)</data>
+ * </screen>
+ */
 import React from "react";
 import { View, ScrollView, StyleSheet, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";

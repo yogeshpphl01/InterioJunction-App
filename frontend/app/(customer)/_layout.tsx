@@ -1,3 +1,8 @@
+/**
+ * <layout group="(customer)" nav="bottom-tabs" role="customer">
+ *   <tabs>Home (index) · Support (tickets) · Design AI (assistant) · Profile</tabs>
+ * </layout>
+ */
 import React from "react";
 import { Tabs } from "expo-router";
 import { Feather } from "@expo/vector-icons";

@@ -1,3 +1,10 @@
+/**
+ * <hook name="useIconFonts" layer="frontend" kind="bootstrap">
+ *   <purpose>Loads @expo/vector-icons glyph fonts (CDN) only under Expo Go,
+ *     where Metro returns 0-byte .ttf on Android. Native/web resolve instantly.</purpose>
+ *   <returns>[loaded: boolean, error: Error | null]</returns>
+ * </hook>
+ */
 // Icon font loader for Expo apps. Fonts are loaded from a CDN only under
 // Expo Go (StoreClient) — that's where @expo/vector-icons' .ttf files come
 // back as 0 bytes from Metro's asset resolver on Android. Native dev/prod

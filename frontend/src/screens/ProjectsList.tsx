@@ -1,3 +1,11 @@
+/**
+ * <screen name="ProjectsList" layer="frontend" role="staff|factory (shared)">
+ *   <purpose>Shared project list. `showCreate` toggles the new-project modal
+ *     (staff only). Reused by /(staff)/projects and /(factory)/projects.</purpose>
+ *   <data>GET /projects · POST /projects</data>
+ *   <sections>project-list · new-project-modal (title, category chips, customer)</sections>
+ * </screen>
+ */
 import React, { useEffect, useState, useCallback } from "react";
 import {
   View, ScrollView, StyleSheet, Pressable, RefreshControl, Modal,

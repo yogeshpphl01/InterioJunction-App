@@ -1,3 +1,11 @@
+/**
+ * <module name="ui" layer="frontend" kind="design-system">
+ *   <purpose>Reusable brand primitives used everywhere. Keep visual changes here
+ *     so they propagate app-wide.</purpose>
+ *   <exports>Txt · Button (primary|outline|ghost) · Field · Chip · StatusPill ·
+ *     Card · Empty · Loading</exports>
+ * </module>
+ */
 import React from "react";
 import {
   Text, View, Pressable, ActivityIndicator, StyleSheet, TextInput,

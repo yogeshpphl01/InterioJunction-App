@@ -1,3 +1,11 @@
+/**
+ * <module name="theme" layer="frontend" kind="design-tokens">
+ *   <purpose>Single source of truth for brand tokens — colors (C), spacing (S),
+ *     radii (R), fonts (F), font sizes (FS), shadow. Mirrors design_guidelines.json
+ *     and the interiojunction.in palette (cream #FDFAF6 + black, editorial).</purpose>
+ *   <usage>import { C, S, R, F, FS, shadow } from "@/src/theme";</usage>
+ * </module>
+ */
 // Interiojunction theme — aligned to interiojunction.in (warm cream + black, editorial).
 export const C = {
   surface: "#FDFAF6",

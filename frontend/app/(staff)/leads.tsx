@@ -1,3 +1,11 @@
+/**
+ * <screen route="/(staff)/leads" name="Leads" role="admin|sales">
+ *   <purpose>CRM lead pipeline — list + create. Public quote/callback
+ *     submissions (source app-quote/app-callback) also surface here.</purpose>
+ *   <data>GET /leads · POST /leads</data>
+ *   <sections>lead-list · new-lead-modal</sections>
+ * </screen>
+ */
 import React, { useEffect, useState, useCallback } from "react";
 import {
   View, ScrollView, StyleSheet, RefreshControl, Pressable, Modal,

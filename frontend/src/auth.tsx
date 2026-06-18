@@ -1,3 +1,13 @@
+/**
+ * <module name="auth" layer="frontend" kind="context-provider">
+ *   <purpose>
+ *     App-wide auth state + actions (loginEmail, requestOtp, verifyOtp, logout).
+ *     On boot, restores the JWT from secure storage and revalidates via /auth/me.
+ *   </purpose>
+ *   <storage>JWT → SecureStore (Keychain/EncryptedSharedPrefs); user profile → AsyncStorage.</storage>
+ *   <consumers>useAuth() across screens; mounted by RootLayout.</consumers>
+ * </module>
+ */
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { storage } from "@/src/utils/storage";
 import { api, setAuthToken } from "@/src/api";

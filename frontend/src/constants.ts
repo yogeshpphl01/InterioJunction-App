@@ -1,3 +1,9 @@
+/**
+ * <module name="constants" layer="frontend" kind="domain">
+ *   <purpose>Production pipeline stages + status→color and role-label helpers
+ *     shared across all screens. Mirrors STAGES in backend/server.py.</purpose>
+ * </module>
+ */
 // Stage pipeline + status helpers shared across screens.
 import { C } from "./theme";
 

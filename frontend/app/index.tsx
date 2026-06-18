@@ -1,3 +1,11 @@
+/**
+ * <screen route="/" name="Index" access="gate">
+ *   <purpose>
+ *     Auth/role gate. While auth boots, show a spinner; then redirect to
+ *     /login (no user) or the role's tab group ((customer)/(factory)/(staff)).
+ *   </purpose>
+ * </screen>
+ */
 import { Redirect } from "expo-router";
 import { View, ActivityIndicator } from "react-native";
 import { useAuth } from "@/src/auth";
